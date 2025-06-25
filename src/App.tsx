@@ -17,7 +17,6 @@ import {
   Terminal,
   Coffee,
   Zap,
-  Users,
   Database,
   Globe,
   XIcon
@@ -69,7 +68,7 @@ export default function Portfolio() {
     setIsSubmitting(true)
 
     try {
-      // const validatedData = contactSchema.parse(formData)
+      const validatedData = contactSchema.parse(formData)
       // Simulate form submission
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
@@ -242,7 +241,6 @@ export default function Portfolio() {
       <section className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-teal-600/20"></div>
         <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=&quot;60&quot; height=&quot;60&quot; viewBox=&quot;0 0 60 60&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;none&quot; fillRule=&quot;evenodd&quot;%3E%3Cg fill=&quot;%23334155&quot; fillOpacity=&quot;0.1&quot;%3E%3Ccircle cx=&quot;30&quot; cy=&quot;30&quot; r=&quot;1&quot;/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
-
         <div
           className={`max-w-6xl mx-auto text-center relative z-10 transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
         >
