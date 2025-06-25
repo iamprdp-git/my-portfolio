@@ -231,7 +231,7 @@ export default function Portfolio() {
 
   const stats = [
     { label: "Projects Completed", value: "25+", icon: Code },
-    { label: "Happy Clients", value: "15+", icon: Users },
+    // { label: "Happy Clients", value: "15+", icon: Users },
     { label: "Years Experience", value: "3+", icon: Calendar },
     { label: "Technologies", value: "20+", icon: Database },
   ]
