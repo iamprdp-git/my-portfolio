@@ -19,21 +19,82 @@ import {
   Zap,
   Database,
   Globe,
-  XIcon
+  XIcon,
+  XCircle,
+  CheckCircle
 } from "lucide-react"
 import { z } from "zod"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import avatar from "@/assets/avatar.jpeg"
-
+import emailjs from "@emailjs/browser"
 const contactSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  subject: z.string().min(5, "Subject must be at least 5 characters"),
-  message: z.string().min(10, "Message must be at least 10 characters"),
+  name: z.string().min(2, "Name must be at least 2 characters").max(50, "Name must be less than 50 characters"),
+  email: z
+    .string()
+    .email("Please enter a valid email address")
+    .min(5, "Email must be at least 5 characters")
+    .max(100, "Email must be less than 100 characters")
+    .refine((email) => {
+      // Check for common disposable email domains
+      const disposableDomains = [
+        "10minutemail.com",
+        "tempmail.org",
+        "guerrillamail.com",
+        "mailinator.com",
+        "yopmail.com",
+        "temp-mail.org",
+      ]
+      const domain = email.split("@")[1]?.toLowerCase()
+      return !disposableDomains.includes(domain)
+    }, "Please use a permanent email address")
+    .refine((email) => {
+      // Basic format validation
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+      return emailRegex.test(email)
+    }, "Please enter a valid email format"),
+  subject: z
+    .string()
+    .min(5, "Subject must be at least 5 characters")
+    .max(100, "Subject must be less than 100 characters"),
+  message: z
+    .string()
+    .min(10, "Message must be at least 10 characters")
+    .max(1000, "Message must be less than 1000 characters"),
 })
+const verifyEmailDomain = async (email: string): Promise<boolean> => {
+  try {
+    const domain = email.split("@")[1]
+    if (!domain) return false
 
+    // Check if domain has MX record (basic DNS validation)
+    // Note: This is a simplified check - in production you might want to use a proper email validation service
+    const commonDomains = [
+      "gmail.com",
+      "yahoo.com",
+      "hotmail.com",
+      "outlook.com",
+      "icloud.com",
+      "protonmail.com",
+      "aol.com",
+      "live.com",
+      "msn.com",
+      "ymail.com",
+    ]
+
+    // Allow common email providers
+    if (commonDomains.includes(domain.toLowerCase())) {
+      return true
+    }
+
+    // For other domains, do basic validation
+    const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    return domainRegex.test(domain)
+  } catch (error) {
+    return false
+  }
+}
 type ContactForm = z.infer<typeof contactSchema>
 
 export default function Portfolio() {
@@ -46,11 +107,24 @@ export default function Portfolio() {
   })
   const [formErrors, setFormErrors] = useState<Partial<ContactForm>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
+  const [submitMessage, setSubmitMessage] = useState("")
 
   useEffect(() => {
     setIsVisible(true)
+    // Initialize EmailJS
+    emailjs.init("H8txH76_o7gNJKWoS")
   }, [])
+  useEffect(() => {
+    if (submitStatus !== "idle") {
+      const timer = setTimeout(() => {
+        setSubmitStatus("idle")
+        setSubmitMessage("")
+      }, 3000)
 
+      return () => clearTimeout(timer)
+    }
+  }, [submitStatus])
   const scrollToSection = (sectionId: string) => {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" })
   }
@@ -61,21 +135,45 @@ export default function Portfolio() {
     if (formErrors[field]) {
       setFormErrors((prev) => ({ ...prev, [field]: undefined }))
     }
+    // Reset submit status when user starts typing
+    if (submitStatus !== "idle") {
+      setSubmitStatus("idle")
+    }
   }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setSubmitStatus("idle")
 
     try {
       const validatedData = contactSchema.parse(formData)
-      // Simulate form submission
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      const isValidDomain = await verifyEmailDomain(validatedData.email)
+      if (!isValidDomain) {
+        setSubmitStatus("error")
+        setSubmitMessage("Please enter a valid email address from a recognized email provider.")
+        return
+      }
+      // Send email using EmailJS
+      const templateParams = {
+        from_name: validatedData.name,
+        from_email: validatedData.email,
+        subject: validatedData.subject,
+        message: validatedData.message,
+        to_email: "pradipgrgofficial@gmail.com",
+      }
 
-      // Reset form
+      await emailjs.send(
+        "service_ddlmvum",
+        "template_yrccaej",
+        templateParams,
+      )
+
+      // Reset form on success
       setFormData({ name: "", email: "", subject: "", message: "" })
       setFormErrors({})
-      alert("Message sent successfully! I'll get back to you soon.")
+      setSubmitStatus("success")
+        setSubmitMessage("Message sent successfully!!!")
+
     } catch (error) {
       if (error instanceof z.ZodError) {
         const errors: Partial<ContactForm> = {}
@@ -85,6 +183,9 @@ export default function Portfolio() {
           }
         })
         setFormErrors(errors)
+      } else {
+        console.error("Email sending failed:", error)
+        setSubmitStatus("error")
       }
     } finally {
       setIsSubmitting(false)
@@ -113,7 +214,7 @@ export default function Portfolio() {
   ]
 
   const projects = [
-       {
+    {
       title: "Scottish Borders Cashmere - Luxury E-commerce",
       description:
         "Premium e-commerce platform for luxury cashmere products with elegant design and smooth shopping experience.",
@@ -167,7 +268,7 @@ export default function Portfolio() {
       live: "https://yogsewa.com/",
       features: ["Class scheduling", "Instructor profiles", "Service booking", "User dashboard"],
     },
- 
+
     {
       title: "Bank Evaluation Management System",
       description:
@@ -392,15 +493,14 @@ export default function Portfolio() {
                   <div className="flex items-center justify-between mb-3">
                     <Badge
                       variant="secondary"
-                      className={`${
-                        project.type === "E-commerce"
+                      className={`${project.type === "E-commerce"
                           ? "bg-green-500/20 text-green-400 border-green-500/30"
                           : project.type === "Custom Software"
                             ? "bg-purple-500/20 text-purple-400 border-purple-500/30"
                             : project.type === "Developer Tool"
                               ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
                               : "bg-orange-500/20 text-orange-400 border-orange-500/30"
-                      }`}
+                        }`}
                     >
                       {project.type === "E-commerce" ? (
                         <ShoppingCart className="w-4 h-4 mr-1" />
@@ -567,7 +667,7 @@ export default function Portfolio() {
                   <h4 className="text-white font-medium mb-4">Connect With Me</h4>
                   <div className="flex gap-4">
                     <a
-                      href="https://github.com/iamprdp-git"target="_blank"
+                      href="https://github.com/iamprdp-git" target="_blank"
 
                       className="w-10 h-10 bg-slate-700 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-colors duration-300 group"
                     >
@@ -590,7 +690,7 @@ export default function Portfolio() {
                       href="https://x.com/gprdp07"
                       className="w-10 h-10  bg-slate-700 hover:bg-white rounded-lg flex items-center justify-center transition-colors duration-300 group"
                     >
-                      <XIcon className="w-5 h-5 text-slate-400 group-hover:text-black"/>
+                      <XIcon className="w-5 h-5 text-slate-400 group-hover:text-black" />
                     </a>
                   </div>
                 </CardContent>
@@ -667,7 +767,19 @@ export default function Portfolio() {
                     />
                     {formErrors.message && <p className="text-red-400 text-sm">{formErrors.message}</p>}
                   </div>
+                  {submitStatus === "success" && (
+                    <div className="flex items-center gap-2 p-4 bg-green-500/20 border border-green-500/30 rounded-lg">
+                      <CheckCircle className="w-5 h-5 text-green-400" />
+                      <p className="text-green-400">{submitMessage}</p>
+                    </div>
+                  )}
 
+                  {submitStatus === "error" && (
+                    <div className="flex items-center gap-2 p-4 bg-red-500/20 border border-red-500/30 rounded-lg">
+                      <XCircle className="w-5 h-5 text-red-400" />
+                      <p className="text-red-400">{submitMessage}</p>
+                    </div>
+                  )}
                   <Button
                     type="submit"
                     disabled={isSubmitting}
