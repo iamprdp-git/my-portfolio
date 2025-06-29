@@ -21,7 +21,10 @@ import {
   Globe,
   XIcon,
   XCircle,
-  CheckCircle
+  CheckCircle,
+  Cog,
+  Building2,
+  ClipboardList
 } from "lucide-react"
 import { z } from "zod"
 import { Input } from "@/components/ui/input"
@@ -172,7 +175,7 @@ export default function Portfolio() {
       setFormData({ name: "", email: "", subject: "", message: "" })
       setFormErrors({})
       setSubmitStatus("success")
-        setSubmitMessage("Message sent successfully!!!")
+      setSubmitMessage("Message sent successfully!!!")
 
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -219,7 +222,7 @@ export default function Portfolio() {
       description:
         "Premium e-commerce platform for luxury cashmere products with elegant design and smooth shopping experience.",
       tech: ["React", "Next.js", "shadcn/ui", "Framer Motion", "TypeScript"],
-      type: "Luxury E-commerce",
+      type: "E-commerce",
       live: "https://scottishborderscashmere.com/",
       features: ["Luxury design", "Product showcase", "Smooth animations", "Premium UX"],
     },
@@ -231,6 +234,36 @@ export default function Portfolio() {
       type: "Web Application",
       live: "https://tgwayon.com/",
       features: ["Responsive design", "Modern UI/UX", "Performance optimized", "SEO friendly"],
+    },
+    {
+      title: "Nepal Association of Oregon (NAO)",
+      description: "A comprehensive community platform for Nepali diaspora in Oregon with membership management, event coordination, scholarship applications, and cultural resource sharing.",
+      tech: ["Typescript", "Tailwindcss", "shadcn/ui", "Paypal", "React"],
+      type: "Non-Profit",
+      live: "https://nepaloregon.org/",
+      features: [
+        "Membership management",
+        "Event coordination",
+        "Scholarship applications",
+        "Cultural resource sharing",
+        "Community engagement platform"
+      ]
+    },
+    {
+      title: "Deego Trails Adventure",
+      description: "A non-profit trekking initiative where adventure meets philanthropy. We trek for a cause - 100% of funds raised go directly to supporting children in Nepal's hilly regions, while participants cover their own trekking expenses.",
+      tech: ["Typescript", "Tailwindcss", "React-router", "shadcn/ui", "React", "Transparency Dashboard"],
+      type: "Non-Profit",
+      live: "https://deegotrails.org/",
+      features: [
+        "Trek-for-cause initiative",
+        "100% funds to children's welfare",
+        "Personal expense model (trekkers cover own costs)",
+        "Full financial transparency",
+        "Impact reports published after each trek",
+        "Community-driven selection of beneficiaries",
+        "Sustainable tourism approach"
+      ]
     },
     {
       title: "Malla Treks - Tourism Platform",
@@ -494,12 +527,20 @@ export default function Portfolio() {
                     <Badge
                       variant="secondary"
                       className={`${project.type === "E-commerce"
-                          ? "bg-green-500/20 text-green-400 border-green-500/30"
-                          : project.type === "Custom Software"
-                            ? "bg-purple-500/20 text-purple-400 border-purple-500/30"
-                            : project.type === "Developer Tool"
-                              ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
-                              : "bg-orange-500/20 text-orange-400 border-orange-500/30"
+                        ? "bg-green-500/20 text-green-400 border-green-500/30"
+                        : project.type === "Non-Profit"
+                          ? "bg-purple-500/20 text-purple-400 border-purple-500/30"
+                          : project.type === "Developer Tool"
+                            ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
+                            : project.type === "Internal Software"
+                              ? "bg-red-500/20 text-red-400 border-red-500/30"
+                              : project.type === "Tourism Platform"
+                                ? "bg-indigo-500/20 text-indigo-400 border-indigo-500/30"
+                                : project.type === "Corporate Website"
+                                  ? "bg-amber-500/200 text-amber-400 border-amber-500/30"
+                                  : project.type === "Service Platform"
+                                    ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                                    : "bg-orange-500/20 text-orange-400 border-orange-500/30"
                         }`}
                     >
                       {project.type === "E-commerce" ? (
@@ -508,6 +549,14 @@ export default function Portfolio() {
                         <Terminal className="w-4 h-4 mr-1" />
                       ) : project.type === "Web Application" ? (
                         <Globe className="w-4 h-4 mr-1" />
+                      ) : project.type === "Internal Software" ? (
+                        <Cog className="w-4 h-4 mr-1" />
+                      ) : project.type === "Tourism Platform" ? (
+                        <MapPin className="w-4 h-4 mr-1" />
+                      ) : project.type === "Corporate Website" ? (
+                        <Building2 className="w-4 h-4 mr-1" />
+                      ) : project.type === "Service Platform" ? (
+                        <ClipboardList className="w-4 h-4 mr-1" />
                       ) : (
                         <Code className="w-4 h-4 mr-1" />
                       )}
