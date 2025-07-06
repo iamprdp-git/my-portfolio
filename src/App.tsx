@@ -94,7 +94,7 @@ const verifyEmailDomain = async (email: string): Promise<boolean> => {
     // For other domains, do basic validation
     const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
     return domainRegex.test(domain)
-  } catch (error) {
+  } catch {
     return false
   }
 }
